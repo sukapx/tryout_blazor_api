@@ -8,6 +8,8 @@ namespace tryout_blazor_api.Server.Controllers;
 [Route("[controller]")]
 public class SightController : ControllerBase
 {
+    // Distance to be close in meters
+    static private readonly float DISTANCE_CLOSE = 100;
     static private List<Sight> sights = new () {
         new () {
             Name = "Brandenburger Tor",
@@ -51,5 +53,25 @@ public class SightController : ControllerBase
         if(id >= sights.Count)
             return sights[0];
         return sights[id];
+    }
+
+    [HttpPost]
+    [Route("check/{id}")]
+    public IActionResult Check(int id, Location location)
+    {
+        if(id < 0 || id >= sights.Count)
+            return Ok(new{ Error="Non existing Sight" });
+
+        var targetedSight = sights[id];
+        var distance = location.Distance(targetedSight.Location!);
+
+        _logger.LogInformation("Checking {location} for sight {id}, distance: {distance}", 
+                                    JsonSerializer.Serialize(location), id, distance);
+
+        if(distance < DISTANCE_CLOSE)
+        {
+            return Ok(new{ Result="You guessed it!" });
+        }
+        return Ok(new{ Result="Wrong guess" });
     }
 }
