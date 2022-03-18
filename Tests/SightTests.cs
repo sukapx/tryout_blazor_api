@@ -30,9 +30,13 @@ namespace Tests.IntegrationTests
         }
 
         [Theory]
+        [InlineData(0, 0, 0, "Wrong guess")]
+        [InlineData(1, 0, 0, "Wrong guess")]
         [InlineData(1, 52.514444F, 13.35F, "guessed it")]
         [InlineData(1, 52.514444F, 13.05F, "Wrong guess")]
         [InlineData(1, 52.414444F, 13.35F, "Wrong guess")]
+        [InlineData(0, 52.514444F, 13.35F, "Wrong guess")]
+        [InlineData(0, 52.516272F, 13.377722F, "guessed it")]
 
         public async Task Sight_Distance(int sightId, float lat, float lon, string result)
         {
