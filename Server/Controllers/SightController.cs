@@ -50,8 +50,9 @@ public class SightController : ControllerBase
     [Route("{id}")]
     public Sight Get(int id)
     {
-        if(id >= sights.Count)
-            return sights[0];
+        if(id < 0 || id >= sights.Count)
+            throw new Exception("Non existing Sight");
+
         return sights[id];
     }
 
@@ -60,7 +61,7 @@ public class SightController : ControllerBase
     public IActionResult Check(int id, Location location)
     {
         if(id < 0 || id >= sights.Count)
-            return Ok(new{ Error="Non existing Sight" });
+            throw new Exception("Non existing Sight");
 
         var targetedSight = sights[id];
         var distance = location.Distance(targetedSight.Location!);
