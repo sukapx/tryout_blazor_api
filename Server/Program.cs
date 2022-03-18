@@ -44,3 +44,6 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+// Needed by Unittests to access this Setup
+public partial class Program { }
