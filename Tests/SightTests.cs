@@ -9,10 +9,10 @@ using Xunit;
 
 namespace Tests.IntegrationTests
 {
-    public class EmployeesControllerIntegrationTests : IClassFixture<TestingWebAppFactory<Program>>
+    public class SightTests : IClassFixture<TestingWebAppFactory<Program>>
     {
         private readonly HttpClient _client;
-        public EmployeesControllerIntegrationTests(TestingWebAppFactory<Program> factory) 
+        public SightTests(TestingWebAppFactory<Program> factory) 
             => _client = factory.CreateClient();
 
         [Fact]
