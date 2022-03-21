@@ -1,9 +1,19 @@
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text;
+using tryout_blazor_api.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<ApplicationDbContext>(options => {
+    // options.UseInMemoryDatabase("InMemoryDb");
+    options.UseSqlite(builder.Configuration.GetConnectionString("SQLite"));
+
+    // Don't do this in production!
+    options.EnableSensitiveDataLogging();
+});
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
