@@ -25,28 +25,6 @@ namespace Tests.IntegrationTests
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
-
-                var sp = services.BuildServiceProvider();
-
-                using (var scope = sp.CreateScope())
-                {
-                    var scopedServices = scope.ServiceProvider;
-                    var db = scopedServices.GetRequiredService<ApplicationDbContext>();
-                    var logger = scopedServices
-                        .GetRequiredService<ILogger<TestingWebAppFactory<TEntryPoint>>>();
-
-                    db.Database.EnsureCreated();
-
-                    try
-                    {
-                        // Seed DB Here!
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "An error occurred seeding the " +
-                            "database with test messages. Error: {Message}", ex.Message);
-                    }
-                }
             });
         }
     }
