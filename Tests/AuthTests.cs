@@ -60,13 +60,46 @@ namespace Tests.IntegrationTests
             var client = _factory.CreateClient();
 
             // Act
-            var exception = await Assert.ThrowsAnyAsync<HttpRequestException>(async () =>
+            var exception = await Assert.ThrowsAnyAsync<Exception>(async () =>
             {
                 var resultReg = await RegisterAs(client, "User3", "pass", "User3@example.net");
             });
 
             // Assert
-            Assert.NotEqual("", exception.Message);
+            Assert.Contains("Passwords must be at least", exception.Message);
+        }
+
+        [Fact]
+        public async Task RegisterNoPassword()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+
+            // Act
+            var exception = await Assert.ThrowsAnyAsync<Exception>(async () =>
+            {
+                var resultReg = await RegisterAs(client, "User4", "", "User4@example.net");
+            });
+
+            // Assert
+            Assert.Contains("Password is required", exception.Message);
+        }
+
+        [Fact]
+        public async Task RegisterExistingUser()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+
+            // Act
+            await RegisterAs(client, "User5", "P4$$w0rd", "User5@example.net");
+            var exception = await Assert.ThrowsAnyAsync<Exception>(async () =>
+            {
+                var resultReg = await RegisterAs(client, "User5", "P4$$w0rd", "User5@example.net");
+            });
+
+            // Assert
+            Assert.Contains("User already exists", exception.Message);
         }
 
         [Fact]

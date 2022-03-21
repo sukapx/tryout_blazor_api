@@ -66,7 +66,7 @@ namespace tryout_blazor_api.Server.Controllers
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User already exists!" });
 
             IdentityUser user = new()
             {
@@ -76,8 +76,13 @@ namespace tryout_blazor_api.Server.Controllers
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-
+            {
+                string reasons = string.Join(",", result.Errors.Select(e => e.Description));
+                return StatusCode(StatusCodes.Status400BadRequest, new Response {
+                    Status = "User creation failed",
+                    Message = $"[{reasons}]"
+                });
+            }
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 

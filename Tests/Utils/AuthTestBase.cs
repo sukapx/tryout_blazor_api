@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -77,7 +78,13 @@ namespace Tests.IntegrationTests
             };
 
             var response = await client.PostAsJsonAsync("Auth/register", regData);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                response.EnsureSuccessStatusCode();
+            }catch(HttpRequestException ex)
+            {
+                throw new Exception(await response.Content.ReadAsStringAsync());
+            }
             var responseString = await response.Content.ReadAsStringAsync();
             var resultRegister = JsonSerializer.Deserialize<Response>(responseString, new JsonSerializerOptions()
             {
