@@ -1,0 +1,34 @@
+@using tryout_blazor_api.Shared.Auth
+@using tryout_blazor_api.Client.Services
+
+@inject IAuthenticationService authenticationService
+@inject ILogger<Login> Logger
+
+<EditForm Model="@loginForm" OnValidSubmit="@HandleLogin">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label for="name">Username</label>
+        <InputText id="name" class="form-control" @bind-Value="loginForm.Username" />
+        <ValidationMessage For="@(() => loginForm.Username)" />
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" class="form-control" type="password" @bind-Value="loginForm.Password" />
+        <ValidationMessage For="@(() => loginForm.Password)" />
+    </div>
+
+    <button class="btn btn-primary">
+        Login
+    </button>
+</EditForm>
+
+@code {
+    private LoginModel loginForm = new();
+
+    private void HandleLogin()
+    {
+        Logger.LogInformation("Login as '{Name}'", loginForm.Username);
+        authenticationService.Login(loginForm);
+    }
+}

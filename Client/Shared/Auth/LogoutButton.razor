@@ -1,0 +1,15 @@
+@using tryout_blazor_api.Shared.Auth
+@using tryout_blazor_api.Client.Services
+
+@inject IAuthenticationService authenticationService
+
+<button class="btn btn-primary" @onclick="HandleLogout">
+	Logout
+</button>
+
+@code {
+	private void HandleLogout()
+	{
+    authenticationService.Logout();
+	}
+}

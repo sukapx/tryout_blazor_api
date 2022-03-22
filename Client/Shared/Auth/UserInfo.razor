@@ -1,0 +1,74 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Linq;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>ClaimsPrincipal Data</h3>
+
+<p>@_authMessage</p>
+
+@if (_claims.Count() > 0)
+{
+  <table class="table">
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">Type</th>
+      <th scope="col">Value</th>
+    </tr>
+    @foreach (var claim in _claims)
+    {
+      <tr>
+        <th scope="row"></th>
+        <td>@claim.Type</td>
+        <td>@claim.Value</td>
+      </tr>
+    }
+  </table>
+}
+
+
+<ul class="list-group">
+  <AuthorizeView>
+    <li class="list-group-item">is authorized</li>
+  </AuthorizeView>
+  <AuthorizeView Roles="User">
+    <li class="list-group-item">is User</li>
+  </AuthorizeView>
+  <AuthorizeView Roles="SightAdder">
+    <li class="list-group-item">is SightAdder</li>
+  </AuthorizeView>
+  <AuthorizeView Roles="Admin">
+    <li class="list-group-item">is Admin</li>
+  </AuthorizeView>
+</ul>
+
+<p>@_userId</p>
+
+@code {
+  private string? _authMessage;
+  private string? _userId;
+  private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+
+  protected override async Task OnParametersSetAsync()
+  {
+    await GetClaimsPrincipalData();
+    await base.OnParametersSetAsync();
+  }
+
+  private async Task GetClaimsPrincipalData()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity.IsAuthenticated)
+    {
+      _authMessage = $"{user.Identity.Name} is authenticated.";
+      _claims = user.Claims;
+      _userId = $"User Id: {user.FindFirst(c => c.Type == "ID")?.Value}";
+    }
+    else
+    {
+      _authMessage = "The user is NOT authenticated.";
+    }
+  }
+}

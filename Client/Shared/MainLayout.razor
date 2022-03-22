@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using tryout_blazor_api.Client.Shared.Auth
+@inherits LayoutComponentBase
 
 <div class="page">
     <div class="sidebar">
@@ -7,7 +9,30 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+
+<AuthorizeView>
+    <Authorized>
+        Hello, <UserName /> <LogoutButton />
+    </Authorized>
+    <NotAuthorized>
+        <button class="btn btn-primary" @onclick="() => RegisterModal?.Open()">Register</button>
+        <button class="btn btn-primary" @onclick="() => LoginModal?.Open()">Login</button>
+
+        <Modal @ref="RegisterModal">
+            <Title>Register</Title>
+            <Body>
+                <Register />
+            </Body>
+        </Modal>
+        <Modal @ref="LoginModal">
+            <Title>Login</Title>
+            <Body>
+                <Login />
+            </Body>
+        </Modal>
+    </NotAuthorized>
+</AuthorizeView>
+
         </div>
 
         <article class="content px-4">
@@ -15,3 +40,7 @@
         </article>
     </main>
 </div>
+@code {
+    private Modal? RegisterModal { get; set; }
+    private Modal? LoginModal { get; set; }
+}

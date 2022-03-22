@@ -1,0 +1,39 @@
+@using tryout_blazor_api.Shared.Auth
+@using tryout_blazor_api.Client.Services
+
+@inject ILogger<Register> Logger
+@inject IAuthenticationService authenticationService
+
+<EditForm Model="@registerForm" OnValidSubmit="@HandleRegister">
+	<DataAnnotationsValidator />
+
+	<div class="form-group">
+		<label for="name">Username</label>
+		<InputText id="name" class="form-control" @bind-Value="registerForm.Username" />
+		<ValidationMessage For="@(() => registerForm.Username)" />
+	</div>
+	<div class="form-group">
+		<label for="email">Email</label>
+		<InputText id="email" class="form-control" type="email" @bind-Value="registerForm.Email" />
+		<ValidationMessage For="@(() => registerForm.Email)" />
+	</div>
+	<div class="form-group">
+		<label for="password">Password</label>
+		<InputText id="password" class="form-control" type="password" @bind-Value="registerForm.Password" />
+		<ValidationMessage For="@(() => registerForm.Password)" />
+	</div>
+
+	<button class="btn btn-primary">
+		Login
+	</button>
+</EditForm>
+
+@code {
+	private RegisterModel registerForm = new();
+
+	private void HandleRegister()
+	{
+		Logger.LogInformation("Registering as '{Name}' '{Mail}'", registerForm.Username, registerForm.Email);
+		authenticationService.Register(registerForm);
+	}
+}
