@@ -85,6 +85,7 @@ namespace tryout_blazor_api.Client.Services
 
         public async Task Logout()
         {
+            _httpclient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "INVALID");
             await _localStorageService.RemoveItemAsync("authToken");
             ((AuthStateProvider)_authStateProvider).NotifyUserLogout();
             _navigationManager.NavigateTo("/");
