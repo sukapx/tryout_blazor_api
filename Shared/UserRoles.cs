@@ -4,5 +4,6 @@ namespace tryout_blazor_api.Shared.Auth
     {
         public const string Admin = "Admin";
         public const string User = "User";
+        public const string SightModerator = "SightMod";
     }
 }

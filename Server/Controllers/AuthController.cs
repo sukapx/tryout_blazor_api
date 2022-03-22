@@ -83,6 +83,9 @@ namespace tryout_blazor_api.Server.Controllers
                     Message = $"[{reasons}]"
                 });
             }
+            await EnsureRoleAndAdd(user, UserRoles.User);
+            await EnsureRoleAndAdd(user, UserRoles.SightModerator);
+
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -99,6 +102,18 @@ namespace tryout_blazor_api.Server.Controllers
                 );
 
             return token;
+        }
+
+        /// <summary>
+        /// Ensures that role exists and user is added to it
+        /// </summary>
+        private async Task EnsureRoleAndAdd(IdentityUser user, string role)
+        {
+            if(await _roleManager.FindByNameAsync(role) is null)
+            {
+                await _roleManager.CreateAsync(new IdentityRole(role));
+            }
+            await _userManager.AddToRoleAsync(user, role);
         }
     }
 }
