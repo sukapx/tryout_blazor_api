@@ -4,21 +4,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
 using tryout_blazor_api.Shared;
 using tryout_blazor_api.Shared.Auth;
 
-// https://jasonwatmore.com/post/2020/08/13/blazor-webassembly-jwt-authentication-example-tutorial
 namespace tryout_blazor_api.Client.Services
 {
-    public interface IAuthenticationService
-    {
-        Task Initialize();
-        Task Register(RegisterModel regData);
-        Task Login(LoginModel loginData);
-        Task Logout();
-    }
-
     public class AuthenticationService : IAuthenticationService
     {
         private HttpClient _httpclient;
