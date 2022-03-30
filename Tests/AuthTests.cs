@@ -1,13 +1,20 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
+using tryout_blazor_api.Shared.Auth;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Tests.IntegrationTests
 {
     public class AuthTests : AuthTestBase
     {
+
+        public AuthTests(ITestOutputHelper output) : base(output) { }
+
+
         [Fact]
         public async Task Unauthorized_Access_is_prevented()
         {
@@ -30,7 +37,7 @@ namespace Tests.IntegrationTests
             var client = _factory.CreateClient();
 
             // Act
-            string bearerToken = await LoginAsUser(client);
+            var bearerToken = await LoginAsUser(client);
             var responseAuthorized = await client.GetAsync("WeatherForecast");
             
             // Assert
@@ -50,7 +57,22 @@ namespace Tests.IntegrationTests
             // Assert
             Assert.NotNull(resultReg);
             Assert.Contains("Success", resultReg!.Status);
-            Assert.NotEqual("", resultLogin);
+            Assert.NotEqual("", resultLogin.Token);
+        }
+
+        [Fact]
+        public async Task RefreshAuthToken()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+
+            // Act
+            var resultLogin = await LoginAsUser(client);
+            var resultRefresh = await client.PostAsJsonAsync("Auth/Refresh", new Refresh { TokenRefresh = resultLogin!.TokenRefresh });
+            var resultRefreshString = await resultRefresh.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.NotEqual("", resultLogin.Token);
         }
 
         [Fact]
@@ -103,20 +125,40 @@ namespace Tests.IntegrationTests
         }
 
         [Fact]
-        public async Task Token_duration()
+        public async Task Token_validity()
         {
             // Arrange
             var client = _factory.CreateClient();
-            var expiryMin = DateTime.Now + TimeSpan.FromHours(1);
-            var expiryMax = DateTime.Now + TimeSpan.FromHours(6);
+            var expiryMin = DateTime.UtcNow + TimeSpan.FromMinutes(5);
+            var expiryMax = DateTime.UtcNow + TimeSpan.FromMinutes(15);
 
             // Act
-            string bearerToken = await LoginAsUser(client);
+            var bearerToken = await LoginAsUser(client);
             var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadToken(bearerToken) as JwtSecurityToken;
+            var token = handler.ReadToken(bearerToken.Token) as JwtSecurityToken;
 
             // Assert
-            Assert.NotEqual("", bearerToken);
+            Assert.NotEqual("", bearerToken.Token);
+            Assert.NotNull(token);
+            Assert.Equal(1, token!.ValidTo.CompareTo(expiryMin));
+            Assert.Equal(-1, token!.ValidTo.CompareTo(expiryMax));
+        }
+
+        [Fact]
+        public async Task Token_refresh_validity()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+            var expiryMin = DateTime.UtcNow + TimeSpan.FromHours(12);
+            var expiryMax = DateTime.UtcNow + TimeSpan.FromHours(25);
+
+            // Act
+            var bearerToken = await LoginAsUser(client);
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadToken(bearerToken.TokenRefresh) as JwtSecurityToken;
+
+            // Assert
+            Assert.NotEqual("", bearerToken.TokenRefresh);
             Assert.NotNull(token);
             Assert.Equal(1, token!.ValidTo.CompareTo(expiryMin));
             Assert.Equal(-1, token!.ValidTo.CompareTo(expiryMax));

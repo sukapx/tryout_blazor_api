@@ -2,7 +2,9 @@
 {
     public class LoginToken
     {
-        public string Token { get; set; }
-        public DateTime Expiration { get; set; }
+        public string? Token { get; set; }
+        public DateTime? TokenExpiration { get; set; }
+
+        public string? TokenRefresh { get; set; }
     }
 }

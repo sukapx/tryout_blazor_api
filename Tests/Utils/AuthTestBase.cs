@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using tryout_blazor_api.Shared;
 using tryout_blazor_api.Shared.Auth;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Tests.IntegrationTests
 {
@@ -14,9 +15,11 @@ namespace Tests.IntegrationTests
     {
         protected readonly TestingWebAppFactory<Program> _factory;
         private static bool Initialized = false;
+        private readonly ITestOutputHelper _output;
 
-        public AuthTestBase()
+        public AuthTestBase(ITestOutputHelper output)
         {
+            (_output) = (output);
             _factory = new TestingWebAppFactory<Program>();
         }
 
@@ -40,28 +43,31 @@ namespace Tests.IntegrationTests
 
 
 
-        protected async Task<string> LoginAsUser(HttpClient client)
+        protected async Task<LoginToken> LoginAsUser(HttpClient client)
         {
             return await LoginAs(client, "user", "P4$$w0rd");
         }
 
-        protected async Task<string> LoginAs(HttpClient client, string user, string pass)
+        protected async Task<LoginToken> LoginAs(HttpClient client, string user, string pass)
         {
             LoginModel loginData = new () {
                 Username = user,
                 Password = pass
             };
 
+            _output.WriteLine($"Login as {JsonSerializer.Serialize(loginData)}");
             var responseLogin = await client.PostAsJsonAsync("Auth/login", loginData);
             responseLogin.EnsureSuccessStatusCode();
             var responseString = await responseLogin.Content.ReadAsStringAsync();
+            _output.WriteLine($"Response is: '{responseString}'");
+
             var resultLogin = JsonSerializer.Deserialize<LoginToken>(responseString, new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true
             });
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", resultLogin!.Token);
 
-            return resultLogin!.Token;
+            return resultLogin;
         }
 
         protected async Task<Response?> RegisterAsUser(HttpClient client)
@@ -77,6 +83,7 @@ namespace Tests.IntegrationTests
                 Email = mail
             };
 
+            _output.WriteLine($"Register as {JsonSerializer.Serialize(regData)}");
             var response = await client.PostAsJsonAsync("Auth/register", regData);
             try
             {
@@ -86,6 +93,8 @@ namespace Tests.IntegrationTests
                 throw new Exception(await response.Content.ReadAsStringAsync());
             }
             var responseString = await response.Content.ReadAsStringAsync();
+            _output.WriteLine($"Response is: '{responseString}'");
+
             var resultRegister = JsonSerializer.Deserialize<Response>(responseString, new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true
