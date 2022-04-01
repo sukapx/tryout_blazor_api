@@ -29,6 +29,27 @@ public static class JwtParser
         }
         return claims;
     }
+
+    public static DateTime GetExpiry(string jwt)
+    {
+        Console.WriteLine("Get Expiry");
+        var payload = jwt.Split('.')[1];
+
+        var jsonBytes = ParseBase64WithoutPadding(payload);
+        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes);
+        
+        if(keyValuePairs is null || !keyValuePairs.ContainsKey("exp"))
+        {
+            Console.WriteLine("JWT doesn't contain exp");
+            return DateTime.MinValue;
+        }
+
+        long expiry = keyValuePairs["exp"].GetInt64();
+        DateTime expiryTime = DateTimeOffset.FromUnixTimeSeconds(expiry).DateTime;
+        Console.WriteLine($"expiry {expiry}, expiryTime {expiryTime}");
+        return expiryTime;
+    }
+
     private static byte[] ParseBase64WithoutPadding(string base64)
     {
         switch (base64.Length % 4)

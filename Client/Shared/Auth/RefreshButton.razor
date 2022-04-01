@@ -1,0 +1,13 @@
+﻿@using tryout_blazor_api.Client.Services
+@inject IAuthenticationService AuthenticationService
+
+<AuthorizeView>
+    <button class="btn btn-primary" @onclick="Refresh">Refresh Token</button>
+</AuthorizeView>
+
+@code {
+    private async Task Refresh()
+    {
+        await AuthenticationService.EnsureAuth();
+    }
+}

@@ -7,6 +7,8 @@ namespace tryout_blazor_api.Client.Services
 		Task Initialize();
 		Task Register(RegisterModel regData);
 		Task Login(LoginModel loginData);
+		Task<bool> EnsureAuth();
+		Task Refresh();
 		Task Logout();
 	}
 }
