@@ -1,0 +1,73 @@
+﻿@using tryout_blazor_api.Shared.Map
+@inject IJSRuntime JS
+@inject HttpClient Http
+@implements IDisposable
+
+<div class="container" id="map"></div>
+
+@code {
+    protected IJSObjectReference? map;
+    protected IJSObjectReference? iconToDo;
+    protected IJSObjectReference? iconDone;
+
+    [Parameter]
+    public double Zoom { get; set; } = 1;
+
+    [Parameter]
+    public Location Viewpoint { get; set; } = new Location()
+    {
+        Latitude = 52.55F,
+        Longitude = 13.21F
+    };
+
+    [Parameter]
+    public IEnumerable<MapItem> MapItems { get; set; } = new List<MapItem>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("Map: OnInitializedAsync");
+
+        // https://leafletjs.com/SlavaUkraini/examples/quick-start/
+        iconToDo = await JS.InvokeAsync<IJSObjectReference>("L.icon", new {
+            iconUrl = "icon/loc_measure.png",
+            iconSize = new[] { 32, 32 },
+            iconAnchor = new[] { 12, 32 }
+        });
+        iconDone = await JS.InvokeAsync<IJSObjectReference>("L.icon", new {
+            iconUrl = "icon/loc_done.png",
+            iconSize = new[] { 32, 32 },
+            iconAnchor = new[] { 12, 32 }
+        });
+
+        map = await JS.InvokeAsync<IJSObjectReference>("L.map", "map", new { center = Viewpoint.ToArray(), zoom = Zoom });
+
+        var layer = await JS.InvokeAsync<IJSObjectReference>("L.tileLayer",
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+        await layer.InvokeVoidAsync("addTo", map);
+
+    }
+
+    public async Task Update(IEnumerable<MapItem>? items = null)
+    {
+        if (items is not null)
+            MapItems = items;
+
+        Console.WriteLine($"Showing {MapItems.Count()} points on Map");
+        await map.InvokeAsync<IJSObjectReference>("setView", Viewpoint.ToArray(), 13);
+        foreach(var mapItem in MapItems)
+        {
+            var marker = new Marker(JS, map, iconDone);
+            await marker.SetTo(mapItem.Location.ToArray());
+            await marker.BindPopup(mapItem.Name);
+            marker.OnClick += () => {
+                Console.WriteLine($"Clicked '{mapItem.Name}'");
+                mapItem.OnClick?.Invoke();
+            };
+        }
+    }
+
+    public void Dispose()
+    {
+    }
+}

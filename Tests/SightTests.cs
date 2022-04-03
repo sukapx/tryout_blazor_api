@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using tryout_blazor_api.Shared;
+using tryout_blazor_api.Shared.Map;
 using Xunit;
 
 namespace Tests.IntegrationTests

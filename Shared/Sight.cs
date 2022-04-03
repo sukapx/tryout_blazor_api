@@ -1,3 +1,5 @@
+using tryout_blazor_api.Shared.Map;
+
 namespace tryout_blazor_api.Shared;
 
 public class Sight

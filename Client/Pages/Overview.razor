@@ -1,0 +1,91 @@
+﻿@page "/Map"
+@using tryout_blazor_api.Client.Shared.Map
+@using tryout_blazor_api.Shared
+@using tryout_blazor_api.Shared.Map
+@using tryout_blazor_api.Shared.Play
+
+<h3>Map</h3>
+
+<button @onclick="Update">Update</button>
+<Map @ref="map" />
+
+@if(details is not null)
+{
+<table>
+    <tbody>
+        <tr>
+            <th>Name</th>
+            <td>@details.Name</td>
+        </tr>
+        <tr>
+            <th>Location</th>
+            <td>@details.Location.Latitude, @details.Location.Longitude</td>
+        </tr>
+            @foreach(var commodity in details.Commodity)
+            {
+        <tr>
+            <th>@commodity.Type</th>
+            <td>@commodity.Amount</td>
+        </tr>   
+            }
+        </tbody>
+</table>
+    
+}
+
+@code {
+    private Map map;
+    protected Market? details;
+    protected List<Market> Markets = new() {
+            new() {
+                Name = "Spektesee",
+                Location = new()
+                {
+                    Latitude = 52.5447F,
+                    Longitude = 13.1675F
+                },
+                Commodity = new List<MarketItem>()
+                {
+                    new () { Type = MarketItemType.Iron, Amount = 100 },
+                    new () { Type = MarketItemType.Wheat, Amount = 60 },
+                    new () { Type = MarketItemType.Wood, Amount = 10 }
+                }
+            },
+            new () {
+                Name = "Altstadt",
+                Location = new ()
+                {
+                    Latitude = 52.5374F,
+                    Longitude = 13.2037F
+                },
+                Commodity = new List<MarketItem>()
+                {
+                    new () { Type = MarketItemType.Iron, Amount = 100 },
+                    new () { Type = MarketItemType.Wheat, Amount = 60 },
+                    new () { Type = MarketItemType.Wood, Amount = 10 }
+                }
+            }
+        };
+
+    public async Task Update()
+    {
+        if (map is null)
+            return;
+
+        var mapItems = Markets.Select(item => new MapItem()
+        {
+            Name = item.Name,
+            Location = item.Location,
+            OnClick = async () => await UpdateDetails(item)
+        });
+
+        await map.Update(mapItems);
+    }
+
+    public async Task UpdateDetails(Market item)
+    {
+        details = item;
+        Console.WriteLine($"Updating details '{details.Name}'");
+        StateHasChanged();
+    }
+}

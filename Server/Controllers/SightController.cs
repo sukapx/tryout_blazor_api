@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using tryout_blazor_api.Shared;
+using tryout_blazor_api.Shared.Map;
 
 namespace tryout_blazor_api.Server.Controllers;
 

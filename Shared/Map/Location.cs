@@ -1,4 +1,4 @@
-namespace tryout_blazor_api.Shared;
+namespace tryout_blazor_api.Shared.Map;
 
 public class Location
 {
@@ -46,4 +46,6 @@ public class Location
     var θ = MathF.Atan2(y, x);
     return (θ*180/MathF.PI + 360) % 360;
   }
+
+    public float[] ToArray() => new float[] { Latitude, Longitude };
 }
