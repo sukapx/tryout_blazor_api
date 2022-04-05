@@ -3,6 +3,7 @@
 @using tryout_blazor_api.Shared
 @using tryout_blazor_api.Shared.Map
 @using tryout_blazor_api.Shared.Play
+@inject HttpClient Http
 
 <h3>Map</h3>
 
@@ -36,41 +37,14 @@
 @code {
     private Map map;
     protected Market? details;
-    protected List<Market> Markets = new() {
-            new() {
-                Name = "Spektesee",
-                Location = new()
-                {
-                    Latitude = 52.5447F,
-                    Longitude = 13.1675F
-                },
-                Commodity = new List<MarketItem>()
-                {
-                    new () { Type = MarketItemType.Iron, Amount = 100 },
-                    new () { Type = MarketItemType.Wheat, Amount = 60 },
-                    new () { Type = MarketItemType.Wood, Amount = 10 }
-                }
-            },
-            new () {
-                Name = "Altstadt",
-                Location = new ()
-                {
-                    Latitude = 52.5374F,
-                    Longitude = 13.2037F
-                },
-                Commodity = new List<MarketItem>()
-                {
-                    new () { Type = MarketItemType.Iron, Amount = 100 },
-                    new () { Type = MarketItemType.Wheat, Amount = 60 },
-                    new () { Type = MarketItemType.Wood, Amount = 10 }
-                }
-            }
-        };
+    protected List<Market> Markets = new();
 
     public async Task Update()
     {
         if (map is null)
             return;
+
+        Markets = await Http.GetFromJsonAsync<List<Market>>("/Market") ?? new List<Market>();
 
         var mapItems = Markets.Select(item => new MapItem()
         {
