@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using tryout_blazor_api.Server;
+using tryout_blazor_api.Server.Controllers;
 using tryout_blazor_api.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,8 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
     };
 });
+
+builder.Services.AddSingleton<MarketController>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

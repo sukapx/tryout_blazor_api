@@ -1,0 +1,59 @@
+﻿@using tryout_blazor_api.Client.Services
+@using tryout_blazor_api.Shared.Play
+@inject HttpClient Http
+@inject IAuthenticationService AuthenticationService
+@attribute [Authorize]
+
+<div class="jumbotron">
+<h3>PlayerInfo</h3>
+
+@if(player is not null)
+{
+    <table>
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <td>@player.Name</td>
+            </tr>
+            <tr>
+                <th>Cargospace Total</th>
+                <td>@player.Cargo.Cargospace</td>
+            </tr>
+            <tr>
+                <th>Cargospace Total</th>
+                <td>
+                    <ul>
+                        @foreach(var item in player.Cargo.Items)
+                        {
+                            <li>@item.Key (@item.Value)</li>
+                        }
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <th>DockedTo</th>
+                <td>@player.DockedTo?.Name</td>
+            </tr>
+        </tbody>
+    </table>        
+}
+</div>
+
+@code {
+    private Player? player;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    protected async Task Refresh()
+    {
+        try{
+            await AuthenticationService.EnsureAuth();
+            player = await Http.GetFromJsonAsync<Player>("Player");
+        }catch(Exception ex) {
+
+        }
+    }
+}

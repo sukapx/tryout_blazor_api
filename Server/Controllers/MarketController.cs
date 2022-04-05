@@ -13,7 +13,7 @@ public class MarketController : ControllerBase
     // Distance to be close in meters
     static private readonly float DISTANCE_CLOSE = 20;
 
-    protected List<Market> Markets = new()
+    protected static List<Market> Markets = new()
     {
         new()
         {
@@ -23,12 +23,15 @@ public class MarketController : ControllerBase
                 Latitude = 52.5447F,
                 Longitude = 13.1675F
             },
-            Commodity = new List<MarketItem>()
+            Cargo = new()
+            {
+                Items = new ()
                 {
-                    new () { Type = MarketItemType.Iron, Amount = 100 },
-                    new () { Type = MarketItemType.Wheat, Amount = 60 },
-                    new () { Type = MarketItemType.Wood, Amount = 10 }
+                    { MarketItemType.Iron, 100 },
+                    { MarketItemType.Wheat, 60 },
+                    { MarketItemType.Wood, 10 }
                 }
+            }
         },
         new()
         {
@@ -38,12 +41,15 @@ public class MarketController : ControllerBase
                 Latitude = 52.5374F,
                 Longitude = 13.2037F
             },
-            Commodity = new List<MarketItem>()
+            Cargo = new()
+            {
+                Items = new()
                 {
-                    new () { Type = MarketItemType.Iron, Amount = 100 },
-                    new () { Type = MarketItemType.Wheat, Amount = 60 },
-                    new () { Type = MarketItemType.Wood, Amount = 10 }
+                    { MarketItemType.Iron, 100 },
+                    { MarketItemType.Wheat, 60 },
+                    { MarketItemType.Wood, 10 }
                 }
+            }
         }
     };
 
@@ -65,20 +71,14 @@ public class MarketController : ControllerBase
     [Route("{id}")]
     public Market Get(int id)
     {
-        if(id < 0 || id >= Markets.Count)
-            throw new Exception("Non existing Market");
-
-        return Markets[id];
+        return GetMarket(id);
     }
 
     [HttpPost]
     [Route("check/{id}")]
     public IActionResult Check(int id, Location location)
     {
-        if(id < 0 || id >= Markets.Count)
-            throw new Exception("Non existing Sight");
-
-        var targetedMarket = Markets[id];
+        var targetedMarket = GetMarket(id);
         var distance = location.Distance(targetedMarket.Location!);
 
         _logger.LogInformation("Checking {location} for Market {id}, distance: {distance}", 
@@ -89,5 +89,14 @@ public class MarketController : ControllerBase
             return Ok(new{ Result="near" });
         }
         return Ok(new{ Result="to far" });
+    }
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public Market GetMarket(int id)
+    {
+        if (id < 0 || id >= Markets.Count)
+            throw new Exception("Non existing Sight");
+
+        return Markets[id];
     }
 }

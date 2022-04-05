@@ -22,13 +22,13 @@
             <th>Location</th>
             <td>@details.Location.Latitude, @details.Location.Longitude</td>
         </tr>
-            @foreach(var commodity in details.Commodity)
-            {
+        @foreach(var item in details.Cargo.Items)
+        {
         <tr>
-            <th>@commodity.Type</th>
-            <td>@commodity.Amount</td>
-        </tr>   
-            }
+            <th>@item.Key</th>
+            <td>@item.Value</td>
+        </tr>
+        }
         </tbody>
 </table>
     
