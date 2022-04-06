@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using tryout_blazor_api.Shared;
 using tryout_blazor_api.Shared.Auth;
+using tryout_blazor_api.Server.Data;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -27,7 +28,7 @@ namespace Tests.IntegrationTests
         {
             if(Initialized)
                 return;
-
+            
             using (var client = _factory.CreateClient())
             {
                 await RegisterAsUser(client);

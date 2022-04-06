@@ -16,44 +16,29 @@ public class PlayerController : ControllerBase
     static private readonly float DISTANCE_CLOSE = 20;
 
     private readonly ILogger<PlayerController> _logger;
-    private readonly MarketController _markets;
+    private readonly ApplicationDbContext _db;
 
-    private static Dictionary<string, Player> Players = new()
-    {
-        {
-            "9c0464d6-a43a-4b06-90d8-0c2294779595",
-            new()
-            {
-                Name = "User1",
-                Cargo = new()
-                {
-                    Items = new()
-                    {
-                        { MarketItemType.Iron, 10 }
-                    }
-                }
-            }
-        }
-    };
-
-    public PlayerController(ILogger<PlayerController> logger,
-        MarketController markets)
+    public PlayerController(
+        ILogger<PlayerController> logger,
+        ApplicationDbContext db)
     {
         _logger = logger;
-        _markets = markets;
+        _db = db;
     }
 
     [HttpGet]
-    public Player? Get()
+    public async Task<Player?> Get()
     {
-        return GetPlayer();
+        return await GetPlayer();
     }
 
     [HttpPost]
     [Route("SetLocation")]
-    public IActionResult SetLocation(Location location)
+    public async Task<IActionResult> SetLocation(Location location)
     {
-        GetPlayer().Location = location;
+        var player = await GetPlayer();
+        player.Location = location;
+        await _db.SaveChangesAsync();
         return Ok();
     }
 
@@ -64,10 +49,10 @@ public class PlayerController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Route("transfer/{marketId}/{type}/{amount}")]
-    public IActionResult Transfer(int marketId, MarketItemType type, int amount)
+    public async Task<IActionResult> Transfer(ulong marketId, MarketItemType type, int amount)
     {
-        var market = _markets.GetMarket(marketId);
-        var player = GetPlayer();
+        var market = _db.Markets.First(m => m.Id == marketId);
+        var player = await GetPlayer();
 
         if (player.Location.DirectionTo(market.Location) > DISTANCE_CLOSE)
         {
@@ -87,23 +72,26 @@ public class PlayerController : ControllerBase
     }
 
 
-    protected Player GetPlayer()
+    protected async Task<Player> GetPlayer()
     {
         _logger.LogInformation($"Get Player");
 
         var playerID = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "ID")?.Value;
         _logger.LogInformation($"Id: {playerID}");
 
-        Player player = null;
-        if (!Players.ContainsKey(playerID))
+        Player? player = _db.Players.FirstOrDefault(p => p.Owner == playerID);
+        if (player is null)
         {
             player = new Player()
             {
-                Name = HttpContext.User.Identity!.Name!
+                Name = HttpContext.User.Identity!.Name!,
+                Owner = playerID
             };
-            Players.Add(playerID, player);
+            await _db.AddAsync(player.Cargo);
+            await _db.Players.AddAsync(player);
+            await _db.SaveChangesAsync();
         }
 
-        return Players[playerID];
+        return player;
     }
 }

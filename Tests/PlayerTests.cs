@@ -32,7 +32,7 @@ namespace Tests.IntegrationTests
         }
 
         [Fact]
-        public async Task TransferToMarket()
+        public async Task Transfer_Market_to_Player()
         {
             // Arrange
             const int TRANSFER_AMOUNT = 3;

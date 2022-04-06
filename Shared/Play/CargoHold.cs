@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +10,9 @@ namespace tryout_blazor_api.Shared.Play;
 
 public class CargoHold
 {
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public ulong Id { get; set; }
+
     public uint Cargospace { get; set; } = 10;
     public Dictionary<MarketItemType, uint> Items { get; set; } = new();
 

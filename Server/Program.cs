@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using tryout_blazor_api.Server;
+using tryout_blazor_api.Server.Data;
 using tryout_blazor_api.Server.Controllers;
 using tryout_blazor_api.Server.Models;
 
@@ -43,8 +44,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddSingleton<MarketController>();
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSwaggerGen(c =>
@@ -52,6 +51,12 @@ builder.Services.AddSwaggerGen(c =>
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });                
     });
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seed = new DBSeed();
+    await seed.Seed(scope);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

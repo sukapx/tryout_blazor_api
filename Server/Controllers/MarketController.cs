@@ -13,72 +13,38 @@ public class MarketController : ControllerBase
     // Distance to be close in meters
     static private readonly float DISTANCE_CLOSE = 20;
 
-    protected static List<Market> Markets = new()
-    {
-        new()
-        {
-            Name = "Spektesee",
-            Location = new()
-            {
-                Latitude = 52.5447F,
-                Longitude = 13.1675F
-            },
-            Cargo = new()
-            {
-                Items = new ()
-                {
-                    { MarketItemType.Iron, 100 },
-                    { MarketItemType.Wheat, 60 },
-                    { MarketItemType.Wood, 10 }
-                }
-            }
-        },
-        new()
-        {
-            Name = "Altstadt",
-            Location = new()
-            {
-                Latitude = 52.5374F,
-                Longitude = 13.2037F
-            },
-            Cargo = new()
-            {
-                Items = new()
-                {
-                    { MarketItemType.Iron, 100 },
-                    { MarketItemType.Wheat, 60 },
-                    { MarketItemType.Wood, 10 }
-                }
-            }
-        }
-    };
-
-
     private readonly ILogger<MarketController> _logger;
+    private readonly ApplicationDbContext _db;
 
-    public MarketController(ILogger<MarketController> logger)
+    public MarketController(
+        ILogger<MarketController> logger,
+        ApplicationDbContext db)
     {
         _logger = logger;
+        _db = db;
     }
 
     [HttpGet]
     public IEnumerable<Market> Get()
     {
-        return Markets;
+        var markets = _db.Markets.ToList();
+        markets.ForEach(market =>
+            _db.Entry(market).Reference(m => m.Location).Load());
+        return markets;
     }
 
     [HttpGet]
     [Route("{id}")]
-    public Market Get(int id)
+    public async Task<Market> Get(ulong id)
     {
-        return GetMarket(id);
+        return await GetMarket(id);
     }
 
     [HttpPost]
     [Route("check/{id}")]
-    public IActionResult Check(int id, Location location)
+    public async Task<IActionResult> Check(ulong id, Location location)
     {
-        var targetedMarket = GetMarket(id);
+        var targetedMarket = await GetMarket(id);
         var distance = location.Distance(targetedMarket.Location!);
 
         _logger.LogInformation("Checking {location} for Market {id}, distance: {distance}", 
@@ -92,11 +58,14 @@ public class MarketController : ControllerBase
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public Market GetMarket(int id)
+    public async Task<Market> GetMarket(ulong id)
     {
-        if (id < 0 || id >= Markets.Count)
-            throw new Exception("Non existing Sight");
+        var market = _db.Markets.First(m => m.Id == id);
+        if (market is null)
+            throw new Exception("Non existing Market");
 
-        return Markets[id];
+        await _db.Entry(market).Reference(m => m.Location).LoadAsync();
+
+        return market;
     }
 }

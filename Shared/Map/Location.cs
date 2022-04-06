@@ -1,8 +1,12 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace tryout_blazor_api.Shared.Map;
 
 public class Location
 {
-  public float Latitude { get; set; } = 0;
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public ulong Id { get; set; }
+    public float Latitude { get; set; } = 0;
   public float Longitude { get; set; } = 0;
   public float Altitude { get; set; } = 0;
 

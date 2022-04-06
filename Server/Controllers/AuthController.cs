@@ -42,6 +42,7 @@ namespace tryout_blazor_api.Server.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
+            _logger.LogInformation("Login from '{Username}' ", model.Username);
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
